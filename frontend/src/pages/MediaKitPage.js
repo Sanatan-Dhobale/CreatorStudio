@@ -18,7 +18,6 @@ const MediaKitPage = () => {
   const [kit, setKit] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [downloading, setDownloading] = useState(false);
   const [activeTab, setActiveTab] = useState('stats');
 
   const fetchKit = async () => {
@@ -41,20 +40,17 @@ const MediaKitPage = () => {
     setSaving(false);
   };
 
-  const handleDownload = async () => {
-    setDownloading(true);
-    try {
-      const res = await axios.get('/api/media-kit/download', { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${creator.username}-media-kit.pdf`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-      toast.success('Media kit downloaded! 📄');
-    } catch { toast.error('PDF generation failed. Make sure Puppeteer is installed.'); }
-    setDownloading(false);
+  const handleDownload = () => {
+    // Opens a new tab with a styled HTML media kit page.
+    // The page has a "Save as PDF" button that triggers window.print().
+    // Token passed as query param since window.open() cannot set auth headers.
+    const token = localStorage.getItem('creatorhub_token');
+    if (!token) { toast.error('Please log in again.'); return; }
+    const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    window.open(`${apiBase}/api/media-kit/download?token=${token}`, '_blank');
+    toast.success('Opened! Click "Save as PDF" in the new tab.');
   };
+
 
   const togglePublic = async () => {
     const updated = { ...kit, isPublic: !kit.isPublic };
@@ -150,8 +146,8 @@ const MediaKitPage = () => {
             <button className="btn btn-outline btn-sm" onClick={handleSave} disabled={saving}>
               {saving ? <span className="spinner spinner-dark" style={{ width: 14, height: 14 }} /> : '💾 Save'}
             </button>
-            <button className="btn btn-primary btn-sm" onClick={handleDownload} disabled={downloading}>
-              {downloading ? <span className="spinner" style={{ width: 14, height: 14 }} /> : '⬇️ Download PDF'}
+            <button className="btn btn-primary btn-sm" onClick={handleDownload}>
+              ⬇️ Download PDF
             </button>
           </div>
         </div>
@@ -386,8 +382,8 @@ const MediaKitPage = () => {
             <button className="btn btn-outline" onClick={handleSave} disabled={saving}>
               {saving ? <><span className="spinner spinner-dark" style={{ width: 14, height: 14 }} /> Saving...</> : '💾 Save Changes'}
             </button>
-            <button className="btn btn-primary" onClick={handleDownload} disabled={downloading}>
-              {downloading ? <><span className="spinner" style={{ width: 14, height: 14 }} /> Generating...</> : '⬇️ Download PDF'}
+            <button className="btn btn-primary" onClick={handleDownload}>
+              ⬇️ Download PDF
             </button>
           </div>
         </div>
