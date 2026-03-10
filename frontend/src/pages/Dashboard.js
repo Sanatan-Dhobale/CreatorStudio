@@ -11,6 +11,17 @@ const Dashboard = () => {
   const [affiliateStats, setAffiliateStats] = useState(null);
   const [recentInquiries, setRecentInquiries] = useState([]);
   const [loading, setLoading] = useState(true);
+  // track which rows are expanded on mobile
+  const [openRows, setOpenRows] = useState(new Set());
+
+  const toggleRow = id => {
+    setOpenRows(prev => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
+      return n;
+    });
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,7 +33,7 @@ const Dashboard = () => {
         setRecentInquiries(inqRes.data.inquiries || []);
         setInquiryStats(inqRes.data.stats || []);
         setAffiliateStats(affRes.data.stats);
-      } catch {}
+      } catch { }
       setLoading(false);
     };
     fetchData();
@@ -42,7 +53,7 @@ const Dashboard = () => {
       <Sidebar />
       <main className="main-content">
         {/* Welcome banner */}
-        <div className="gradient-banner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="gradient-banner gradient-banner-flex">
           <div>
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, marginBottom: 4, color: 'white' }}>
               Good day, {creator?.name?.split(' ')[0]}! 👋
@@ -56,7 +67,7 @@ const Dashboard = () => {
             style={{
               background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)',
               color: 'white', padding: '8px 16px', borderRadius: 8, cursor: 'pointer',
-              fontSize: 13, fontWeight: 600, fontFamily: 'inherit'
+              fontSize: 13, fontWeight: 600, fontFamily: 'inherit', whiteSpace: 'nowrap'
             }}
           >
             📋 Copy Link
@@ -98,7 +109,7 @@ const Dashboard = () => {
         </div>
 
         {/* Quick actions + Recent inquiries */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 20 }}>
+        <div className="dashboard-grid dashboard-grid-1-2">
           {/* Quick actions */}
           <div className="card">
             <div className="card-title" style={{ marginBottom: 16 }}>Quick Actions</div>
@@ -141,25 +152,30 @@ const Dashboard = () => {
                 <p>Share your collab link to start receiving brand deals</p>
               </div>
             ) : (
-              <div className="table-wrapper">
-                <table>
+              <div className="dashboard-recent-table-wrapper">
+                <table className="dashboard-recent-table">
                   <thead>
                     <tr>
                       <th>Brand</th>
-                      <th>Budget</th>
-                      <th>Type</th>
+                      <th className="hide-mobile">Budget</th>
+                      <th className="hide-mobile">Type</th>
                       <th>Status</th>
-                      <th>Date</th>
+                      <th className="hide-mobile">Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {recentInquiries.map(inq => (
-                      <tr key={inq._id}>
-                        <td><strong>{inq.brandName}</strong><br /><span style={{ color: 'var(--text-muted)', fontSize: 11 }}>{inq.email}</span></td>
-                        <td style={{ color: 'var(--purple)', fontWeight: 600, fontSize: 12 }}>{inq.budgetRange}</td>
-                        <td>{inq.campaignType.map(t => <span key={t} className="tag">{t}</span>)}</td>
+                      <tr
+                        key={inq._id}
+                        className={openRows.has(inq._id) ? 'expanded' : ''}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => toggleRow(inq._id)}
+                      >
+                        <td className="brand-cell"><strong>{inq.brandName}</strong><br /><span style={{ color: 'var(--text-muted)', fontSize: 11 }}>{inq.email}</span></td>
+                        <td className="hide-mobile" style={{ color: 'var(--purple)', fontWeight: 600, fontSize: 12 }}>{inq.budgetRange}</td>
+                        <td className="hide-mobile">{inq.campaignType.map(t => <span key={t} className="tag">{t}</span>)}</td>
                         <td><span className={getStatusClass(inq.status)}>{inq.status}</span></td>
-                        <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{new Date(inq.createdAt).toLocaleDateString('en-IN')}</td>
+                        <td className="hide-mobile" style={{ color: 'var(--text-muted)', fontSize: 12 }}>{new Date(inq.createdAt).toLocaleDateString('en-IN')}</td>
                       </tr>
                     ))}
                   </tbody>

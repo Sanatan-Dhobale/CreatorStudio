@@ -4,16 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
 const AuthLayout = ({ children, title, subtitle, switchText, switchLink, switchLabel }) => (
-  <div style={{
-    display: 'flex', minHeight: '100vh', fontFamily: "'DM Sans', sans-serif"
-  }}>
+  <div className="auth-layout" style={{ fontFamily: "'DM Sans', sans-serif" }}>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     {/* Left Panel */}
-    <div style={{
-      width: '45%', background: 'linear-gradient(135deg, #6C63FF 0%, #4ECDC4 100%)',
-      display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-      padding: '48px', position: 'relative', overflow: 'hidden'
+    <div className="auth-left-panel" style={{
+      background: 'linear-gradient(135deg, #6C63FF 0%, #4ECDC4 100%)'
     }}>
       {/* Decorative circles */}
       <div style={{
@@ -28,7 +24,7 @@ const AuthLayout = ({ children, title, subtitle, switchText, switchLink, switchL
       <div style={{ position: 'relative', textAlign: 'center', color: 'white' }}>
         <div style={{ fontSize: 48, marginBottom: 16 }}>⚡</div>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, marginBottom: 12 }}>
-          CreatorHub
+          CreatorStudio
         </h1>
         <p style={{ opacity: 0.85, fontSize: 15, lineHeight: 1.7, maxWidth: 280 }}>
           The all-in-one professional toolkit for Indian content creators.
@@ -50,14 +46,11 @@ const AuthLayout = ({ children, title, subtitle, switchText, switchLink, switchL
     </div>
 
     {/* Right Panel */}
-    <div style={{
-      flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: 48, background: '#FFFFFF'
-    }}>
+    <div className="auth-right-panel">
       <div style={{ width: '100%', maxWidth: 400 }}>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', marginBottom: 36 }}>
           <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #6C63FF, #4ECDC4)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>⚡</div>
-          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: '#1A1A2E' }}>CreatorHub</span>
+          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: '#1A1A2E' }}>CreatorStudio</span>
         </Link>
 
         <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A2E', marginBottom: 6 }}>{title}</h2>
@@ -97,7 +90,7 @@ export const LoginPage = () => {
   return (
     <AuthLayout
       title="Welcome back"
-      subtitle="Sign in to your CreatorHub dashboard"
+      subtitle="Sign in to your CreatorStudio dashboard"
       switchText="Don't have an account?"
       switchLink="/register"
       switchLabel="Get started free"
@@ -153,7 +146,7 @@ export const RegisterPage = () => {
     setLoading(true);
     try {
       await register(form.name, form.username.toLowerCase(), form.email, form.password);
-      toast.success('Account created! Welcome to CreatorHub 🎉');
+      toast.success('Account created! Welcome to CreatorStudio 🎉');
       navigate('/dashboard');
     } catch (err) {
       toast.error(err.response?.data?.error || 'Registration failed');
@@ -171,7 +164,7 @@ export const RegisterPage = () => {
       switchLabel="Sign in"
     >
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 12px' }}>
+        <div className="register-grid">
           <div className="form-group">
             <label className="form-label">Full Name</label>
             <input className="form-input" type="text" placeholder="Priya Sharma" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />

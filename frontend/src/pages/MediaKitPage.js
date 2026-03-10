@@ -41,9 +41,6 @@ const MediaKitPage = () => {
   };
 
   const handleDownload = () => {
-    // Opens a new tab with a styled HTML media kit page.
-    // The page has a "Save as PDF" button that triggers window.print().
-    // Token passed as query param since window.open() cannot set auth headers.
     const token = localStorage.getItem('creatorhub_token');
     if (!token) { toast.error('Please log in again.'); return; }
     const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -51,14 +48,13 @@ const MediaKitPage = () => {
     toast.success('Opened! Click "Save as PDF" in the new tab.');
   };
 
-
   const togglePublic = async () => {
     const updated = { ...kit, isPublic: !kit.isPublic };
     setKit(updated);
     try {
       await axios.put('/api/media-kit/me', { isPublic: updated.isPublic });
       toast.success(updated.isPublic ? 'Media kit is now public! 🌐' : 'Media kit set to private');
-    } catch {}
+    } catch { }
   };
 
   const updateKit = (path, value) => {
@@ -124,12 +120,12 @@ const MediaKitPage = () => {
     <div className="dashboard-layout">
       <Sidebar />
       <main className="main-content">
-        <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div className="page-header page-header-flex">
           <div>
             <h1>Media Kit</h1>
             <p>Generate your professional creator media kit for brands</p>
           </div>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <div className="media-kit-header-actions">
             {kit?.isPublic && (
               <a
                 href={`/api/media-kit/public/${kit.publicSlug}`}
@@ -155,40 +151,41 @@ const MediaKitPage = () => {
         {/* Preview strip */}
         <div style={{
           background: 'white', border: '1px solid var(--border)', borderRadius: 12,
-          padding: '16px 24px', marginBottom: 24,
-          display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap'
+          padding: '16px 24px', marginBottom: 24
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{
-              width: 48, height: 48, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #6C63FF, #4ECDC4)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'white', fontWeight: 700, fontSize: 20
-            }}>{creator?.name?.charAt(0)}</div>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: 15 }}>{creator?.name}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>@{creator?.instagramHandle || creator?.username} • {kit?.niche || creator?.niche}</div>
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 24 }}>
-            {[
-              { label: 'Followers', value: (kit?.followers?.instagram || 0).toLocaleString() },
-              { label: 'Engagement', value: `${kit?.engagementRate || 0}%` },
-              { label: 'Avg Views', value: (kit?.avgViews?.reels || 0).toLocaleString() },
-            ].map(s => (
-              <div key={s.label} style={{ textAlign: 'center' }}>
-                <div style={{ fontWeight: 700, fontSize: 18, color: 'var(--purple)' }}>{s.value}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.label}</div>
+          <div className="media-kit-preview">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{
+                width: 48, height: 48, borderRadius: '50%',
+                background: 'linear-gradient(135deg, #6C63FF, #4ECDC4)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'white', fontWeight: 700, fontSize: 20
+              }}>{creator?.name?.charAt(0)}</div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 15 }}>{creator?.name}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>@{creator?.instagramHandle || creator?.username} • {kit?.niche || creator?.niche}</div>
               </div>
-            ))}
-          </div>
-          <div style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
-            Theme: <strong style={{ textTransform: 'capitalize' }}>{kit?.theme || 'minimal'}</strong>
+            </div>
+            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+              {[
+                { label: 'Followers', value: (kit?.followers?.instagram || 0).toLocaleString() },
+                { label: 'Engagement', value: `${kit?.engagementRate || 0}%` },
+                { label: 'Avg Views', value: (kit?.avgViews?.reels || 0).toLocaleString() },
+              ].map(s => (
+                <div key={s.label} style={{ textAlign: 'center' }}>
+                  <div style={{ fontWeight: 700, fontSize: 18, color: 'var(--purple)' }}>{s.value}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              Theme: <strong style={{ textTransform: 'capitalize' }}>{kit?.theme || 'minimal'}</strong>
+            </div>
           </div>
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: 4, marginBottom: 20, background: '#F3F4F6', padding: 4, borderRadius: 10, width: 'fit-content' }}>
+        <div className="media-kit-tabs" style={{ marginBottom: 20 }}>
           {tabs.map(t => (
             <button
               key={t.id}
@@ -198,7 +195,8 @@ const MediaKitPage = () => {
                 fontFamily: 'inherit', fontSize: 13, fontWeight: 500, transition: 'all 0.15s',
                 background: activeTab === t.id ? 'white' : 'transparent',
                 color: activeTab === t.id ? 'var(--purple)' : 'var(--text-muted)',
-                boxShadow: activeTab === t.id ? 'var(--shadow-sm)' : 'none'
+                boxShadow: activeTab === t.id ? 'var(--shadow-sm)' : 'none',
+                whiteSpace: 'nowrap'
               }}
             >{t.label}</button>
           ))}
@@ -209,7 +207,7 @@ const MediaKitPage = () => {
           {activeTab === 'stats' && (
             <div>
               <h3 style={{ marginBottom: 20, fontFamily: "'Playfair Display', serif", fontSize: 18 }}>Platform Stats</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+              <div className="form-grid-2">
                 <div className="form-group">
                   <label className="form-label">Instagram Followers</label>
                   <input className="form-input" type="number" placeholder="50000" value={kit?.followers?.instagram || ''} onChange={e => updateKit('followers.instagram', Number(e.target.value))} />
@@ -230,7 +228,7 @@ const MediaKitPage = () => {
               </div>
 
               <h4 style={{ margin: '20px 0 12px', fontWeight: 600, fontSize: 14 }}>Average Views</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+              <div className="form-grid-3">
                 {['reels', 'stories', 'posts'].map(type => (
                   <div key={type} className="form-group">
                     <label className="form-label" style={{ textTransform: 'capitalize' }}>{type}</label>
@@ -247,7 +245,7 @@ const MediaKitPage = () => {
               <h3 style={{ marginBottom: 20, fontFamily: "'Playfair Display', serif", fontSize: 18 }}>Audience Demographics</h3>
 
               <h4 style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Age Groups (%)</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10, marginBottom: 24 }}>
+              <div className="form-grid-5" style={{ marginBottom: 24 }}>
                 {AGE_GROUPS.map(age => (
                   <div key={age} className="form-group">
                     <label className="form-label" style={{ textAlign: 'center' }}>{age}</label>
@@ -257,7 +255,7 @@ const MediaKitPage = () => {
               </div>
 
               <h4 style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Gender Split (%)</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+              <div className="form-grid-2" style={{ marginBottom: 24 }}>
                 <div className="form-group">
                   <label className="form-label">Female %</label>
                   <input className="form-input" type="number" placeholder="60" value={kit?.demographics?.genderSplit?.female || ''} onChange={e => updateKit('demographics.genderSplit.female', Number(e.target.value))} />
@@ -270,8 +268,8 @@ const MediaKitPage = () => {
 
               <h4 style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>Top Locations</h4>
               {(kit?.demographics?.topLocations || []).map((loc, idx) => (
-                <div key={idx} style={{ display: 'flex', gap: 10, marginBottom: 8, alignItems: 'center' }}>
-                  <input className="form-input" placeholder="City (e.g. Mumbai)" value={loc.city || ''} onChange={e => {
+                <div key={idx} style={{ display: 'flex', gap: 10, marginBottom: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input className="form-input" placeholder="City (e.g. Mumbai)" style={{ flex: 1, minWidth: 120 }} value={loc.city || ''} onChange={e => {
                     const locs = [...(kit.demographics?.topLocations || [])];
                     locs[idx] = { ...locs[idx], city: e.target.value };
                     updateKit('demographics.topLocations', locs);
@@ -296,7 +294,7 @@ const MediaKitPage = () => {
                 <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 16 }}>Add brands you've collaborated with to boost credibility.</p>
               )}
               {(kit?.brandsWorkedWith || []).map((brand, idx) => (
-                <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 80px auto', gap: 10, marginBottom: 10, alignItems: 'end' }}>
+                <div key={idx} className="brand-row" style={{ marginBottom: 10 }}>
                   <div>
                     {idx === 0 && <label className="form-label">Brand Name</label>}
                     <input className="form-input" placeholder="e.g. Mamaearth" value={brand.name} onChange={e => updateBrand(idx, 'name', e.target.value)} />
@@ -309,7 +307,7 @@ const MediaKitPage = () => {
                     {idx === 0 && <label className="form-label">Logo URL</label>}
                     <input className="form-input" placeholder="https://..." value={brand.logoUrl} onChange={e => updateBrand(idx, 'logoUrl', e.target.value)} />
                   </div>
-                  <button onClick={() => removeBrand(idx)} style={{ background: 'none', border: '1px solid var(--coral)', borderRadius: 6, cursor: 'pointer', color: 'var(--coral)', padding: '8px 10px', marginBottom: idx === 0 ? 0 : 0 }}>×</button>
+                  <button onClick={() => removeBrand(idx)} style={{ background: 'none', border: '1px solid var(--coral)', borderRadius: 6, cursor: 'pointer', color: 'var(--coral)', padding: '8px 10px' }}>×</button>
                 </div>
               ))}
               <button className="btn btn-outline btn-sm" onClick={addBrand}>+ Add Brand</button>
@@ -328,7 +326,7 @@ const MediaKitPage = () => {
                     <strong style={{ fontSize: 14 }}>Service {idx + 1}</strong>
                     <button onClick={() => removeService(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--coral)', fontSize: 16 }}>× Remove</button>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 10 }}>
+                  <div className="service-grid">
                     <div className="form-group" style={{ marginBottom: 8 }}>
                       <label className="form-label">Service Name</label>
                       <input className="form-input" placeholder="e.g. Instagram Reel" value={service.name} onChange={e => updateService(idx, 'name', e.target.value)} />
@@ -352,7 +350,7 @@ const MediaKitPage = () => {
           {activeTab === 'design' && (
             <div>
               <h3 style={{ marginBottom: 20, fontFamily: "'Playfair Display', serif", fontSize: 18 }}>PDF Theme</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+              <div className="theme-grid">
                 {THEMES.map(t => (
                   <div
                     key={t.id}
@@ -378,7 +376,7 @@ const MediaKitPage = () => {
           )}
 
           {/* Save button */}
-          <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--border)', display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+          <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--border)', display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
             <button className="btn btn-outline" onClick={handleSave} disabled={saving}>
               {saving ? <><span className="spinner spinner-dark" style={{ width: 14, height: 14 }} /> Saving...</> : '💾 Save Changes'}
             </button>

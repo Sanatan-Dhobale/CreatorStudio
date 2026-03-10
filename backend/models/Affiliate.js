@@ -24,7 +24,7 @@ const AffiliateLinkSchema = new mongoose.Schema({
   },
   platform: {
     type: String,
-    enum: ['Amazon', 'Flipkart', 'Meesho', 'Myntra', 'Ajio', 'Nykaa', 'Custom', 'Other'],
+    enum: ['Amazon', 'Flipkart', 'Meesho', 'Myntra', 'Ajio', 'Nykaa', 'YouTube', 'Twitter', 'Instagram', 'Spotify', 'TikTok', 'Custom', 'Other'],
     default: 'Other'
   },
   category: {
@@ -37,16 +37,38 @@ const AffiliateLinkSchema = new mongoose.Schema({
   },
   revenueManual: {
     type: Number,
-    default: 0,
-    comment: 'Creator manually inputs earnings'
+    default: 0
   },
   isActive: {
     type: Boolean,
     default: true
   },
-  utmSource: { type: String, default: '' },
-  utmMedium: { type: String, default: '' },
-  utmCampaign: { type: String, default: '' }
+  utmSource:   { type: String, default: '' },
+  utmMedium:   { type: String, default: '' },
+  utmCampaign: { type: String, default: '' },
+
+  // ─── Open in App ──────────────────────────────────────────────────────────
+  openInApp: {
+    type: Boolean,
+    default: false
+  },
+  // Cached deep link info (resolved once on creation, avoids re-parsing every redirect)
+  deepLinkPlatform: {
+    type: String,
+    default: ''
+  },
+  deepLinkIos: {
+    type: String,
+    default: ''
+  },
+  deepLinkAndroid: {
+    type: String,
+    default: ''
+  },
+
+  // Deep link analytics
+  appOpenCount:      { type: Number, default: 0 }, // successful app opens
+  fallbackOpenCount: { type: Number, default: 0 }  // opened in browser (app not installed)
 }, {
   timestamps: true
 });
@@ -54,6 +76,7 @@ const AffiliateLinkSchema = new mongoose.Schema({
 AffiliateLinkSchema.index({ creatorId: 1 });
 AffiliateLinkSchema.index({ slug: 1 }, { unique: true });
 
+// ─── Click Analytics ──────────────────────────────────────────────────────
 const ClickAnalyticsSchema = new mongoose.Schema({
   linkId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -69,34 +92,22 @@ const ClickAnalyticsSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  ip: {
-    type: String,
-    default: ''
+  ip:       { type: String, default: '' },
+  device:   { type: String, enum: ['mobile', 'desktop', 'tablet', 'unknown'], default: 'unknown' },
+  browser:  { type: String, default: '' },
+  os:       { type: String, default: '' },
+  country:  { type: String, default: 'Unknown' },
+  referrer: { type: String, default: '' },
+  hour:     { type: Number, default: 0 }, // 0–23 for heatmap
+
+  // Deep link tracking
+  openedInApp: {
+    type: Boolean,
+    default: false   // true = native app, false = browser fallback
   },
-  device: {
-    type: String,
-    enum: ['mobile', 'desktop', 'tablet', 'unknown'],
-    default: 'unknown'
-  },
-  browser: {
-    type: String,
-    default: ''
-  },
-  os: {
-    type: String,
-    default: ''
-  },
-  country: {
-    type: String,
-    default: 'Unknown'
-  },
-  referrer: {
-    type: String,
-    default: ''
-  },
-  hour: {
-    type: Number, // 0-23 for heatmap
-    default: 0
+  deepLinkAttempted: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: false
@@ -105,7 +116,7 @@ const ClickAnalyticsSchema = new mongoose.Schema({
 ClickAnalyticsSchema.index({ linkId: 1, timestamp: -1 });
 ClickAnalyticsSchema.index({ creatorId: 1, timestamp: -1 });
 
-const AffiliateLink = mongoose.model('AffiliateLink', AffiliateLinkSchema);
+const AffiliateLink  = mongoose.model('AffiliateLink', AffiliateLinkSchema);
 const ClickAnalytics = mongoose.model('ClickAnalytics', ClickAnalyticsSchema);
 
 module.exports = { AffiliateLink, ClickAnalytics };

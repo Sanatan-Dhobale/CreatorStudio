@@ -14,9 +14,20 @@ const AffiliatePage = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [selectedLink, setSelectedLink] = useState(null);
   const [analytics, setAnalytics] = useState(null);
+  // collapse rows on mobile
+  const [openRows, setOpenRows] = useState(new Set());
+  const toggleRow = id => {
+    setOpenRows(prev => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
+      return n;
+    });
+  };
   const [form, setForm] = useState({
     title: '', originalUrl: '', slug: '', platform: 'Amazon',
-    category: 'General', utmSource: '', utmMedium: '', utmCampaign: ''
+    category: 'General', utmSource: '', utmMedium: '', utmCampaign: '',
+    openInApp: false
   });
   const [creating, setCreating] = useState(false);
 
@@ -28,7 +39,7 @@ const AffiliatePage = () => {
       ]);
       setLinks(linksRes.data.links);
       setDashStats(dashRes.data.stats);
-    } catch {}
+    } catch { }
     setLoading(false);
   };
 
@@ -38,7 +49,7 @@ const AffiliatePage = () => {
     try {
       const res = await axios.get(`/api/affiliate/links/${linkId}/analytics?days=30`);
       setAnalytics(res.data);
-    } catch {}
+    } catch { }
   };
 
   const handleCreate = async () => {
@@ -52,7 +63,7 @@ const AffiliatePage = () => {
       await axios.post('/api/affiliate/links', { ...form, slug });
       toast.success('Link created! 🔗');
       setShowCreate(false);
-      setForm({ title: '', originalUrl: '', slug: '', platform: 'Amazon', category: 'General', utmSource: '', utmMedium: '', utmCampaign: '' });
+      setForm({ title: '', originalUrl: '', slug: '', platform: 'Amazon', category: 'General', utmSource: '', utmMedium: '', utmCampaign: '', openInApp: false });
       fetchLinks();
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to create link');
@@ -76,7 +87,7 @@ const AffiliatePage = () => {
       await axios.put(`/api/affiliate/links/${id}`, { revenueManual: Number(revenue) });
       toast.success('Revenue updated');
       fetchLinks();
-    } catch {}
+    } catch { }
   };
 
   const copyLink = (slug) => {
@@ -93,7 +104,7 @@ const AffiliatePage = () => {
     <div className="dashboard-layout">
       <Sidebar />
       <main className="main-content">
-        <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div className="page-header page-header-flex">
           <div>
             <h1>Affiliate Link Tracker</h1>
             <p>Create trackable short links and monitor performance</p>
@@ -104,7 +115,7 @@ const AffiliatePage = () => {
         </div>
 
         {/* Stats */}
-        <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+        <div className="stats-grid affiliate-stats-grid">
           <div className="stat-card">
             <div className="stat-icon" style={{ background: '#EEF0FF' }}>🔗</div>
             <div className="stat-value">{dashStats?.totalLinks || 0}</div>
@@ -127,7 +138,7 @@ const AffiliatePage = () => {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: selectedLink ? '1fr 400px' : '1fr', gap: 20 }}>
+        <div className={`dashboard-grid ${selectedLink ? 'dashboard-grid-with-panel-lg' : ''}`}>
           {/* Links table */}
           <div className="card" style={{ padding: 0 }}>
             <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -145,51 +156,59 @@ const AffiliatePage = () => {
                 <button className="btn btn-primary" onClick={() => setShowCreate(true)}>Create Link</button>
               </div>
             ) : (
-              <div className="table-wrapper">
-                <table>
+              <div className="table-wrapper affiliate-table-wrapper">
+                <table className="affiliate-table">
                   <thead>
                     <tr>
                       <th>Link</th>
-                      <th>Platform</th>
-                      <th>Short URL</th>
-                      <th>Total Clicks</th>
-                      <th>7-Day Clicks</th>
-                      <th>Revenue (₹)</th>
-                      <th>Actions</th>
+                      <th className="hide-mobile">Platform</th>
+                      <th className="hide-mobile">Short URL</th>
+                      <th className="hide-mobile">Total Clicks</th>
+                      <th className="hide-mobile">7-Day Clicks</th>
+                      <th className="hide-mobile">Revenue (₹)</th>
+                      <th className="hide-mobile">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {links.map(link => (
                       <tr
                         key={link._id}
+                        className={openRows.has(link._id) ? 'expanded' : ''}
                         style={{ cursor: 'pointer', background: selectedLink?._id === link._id ? '#F8F9FF' : 'white' }}
-                        onClick={() => { setSelectedLink(link); fetchAnalytics(link._id); }}
+                        onClick={() => { setSelectedLink(link); fetchAnalytics(link._id); toggleRow(link._id); }}
                       >
-                        <td>
+                        <td className="link-cell">
                           <strong style={{ fontSize: 13 }}>{link.title}</strong>
                           <div style={{ fontSize: 11, color: 'var(--text-muted)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {link.originalUrl}
                           </div>
                         </td>
-                        <td>
+                        <td className="platform-cell hide-mobile">
                           <span style={{
                             fontSize: 11, fontWeight: 700, color: platformColors[link.platform] || '#6B7280',
                             background: `${platformColors[link.platform]}15`,
                             padding: '2px 8px', borderRadius: 4
                           }}>{link.platform}</span>
+                          {link.openInApp && (
+                            <span title="Open in App enabled" style={{
+                              display: 'inline-block', marginLeft: 4, fontSize: 10, fontWeight: 700,
+                              background: '#ECFDF5', color: '#059669', padding: '2px 6px',
+                              borderRadius: 4, verticalAlign: 'middle'
+                            }}>📱 APP</span>
+                          )}
                         </td>
-                        <td>
+                        <td className="shorturl-cell hide-mobile">
                           <code style={{ fontSize: 11, background: '#F3F4F6', padding: '3px 8px', borderRadius: 4, color: '#6C63FF' }}>
                             /p/{link.slug}
                           </code>
                         </td>
-                        <td><strong>{link.totalClicks.toLocaleString()}</strong></td>
-                        <td>
+                        <td className="hide-mobile"><strong>{link.totalClicks.toLocaleString()}</strong></td>
+                        <td className="hide-mobile">
                           <span style={{ color: link.recentClicks > 0 ? '#059669' : 'var(--text-muted)', fontWeight: link.recentClicks > 0 ? 600 : 400 }}>
                             {link.recentClicks}
                           </span>
                         </td>
-                        <td onClick={e => e.stopPropagation()}>
+                        <td className="hide-mobile" onClick={e => e.stopPropagation()}>
                           <input
                             type="number"
                             defaultValue={link.revenueManual || ''}
@@ -309,6 +328,33 @@ const AffiliatePage = () => {
                 </>
               )}
 
+              {/* App Open Analytics */}
+              {selectedLink.openInApp && (
+                <div style={{ marginTop: 20 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-muted)', marginBottom: 10 }}>
+                    📱 App Open Analytics
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                    <div style={{ background: '#ECFDF5', borderRadius: 8, padding: '12px', textAlign: 'center' }}>
+                      <div style={{ fontSize: 20, fontWeight: 700, color: '#059669' }}>{selectedLink.appOpenCount || 0}</div>
+                      <div style={{ fontSize: 10, color: '#6B7280', marginTop: 2 }}>Opened in App</div>
+                    </div>
+                    <div style={{ background: '#FFF8E6', borderRadius: 8, padding: '12px', textAlign: 'center' }}>
+                      <div style={{ fontSize: 20, fontWeight: 700, color: '#D97706' }}>{selectedLink.fallbackOpenCount || 0}</div>
+                      <div style={{ fontSize: 10, color: '#6B7280', marginTop: 2 }}>Browser Fallback</div>
+                    </div>
+                  </div>
+                  {(selectedLink.appOpenCount + selectedLink.fallbackOpenCount) > 0 && (
+                    <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-muted)', textAlign: 'center' }}>
+                      App success rate:{' '}
+                      <strong style={{ color: '#059669' }}>
+                        {Math.round((selectedLink.appOpenCount / (selectedLink.appOpenCount + selectedLink.fallbackOpenCount)) * 100)}%
+                      </strong>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: 20 }} onClick={() => copyLink(selectedLink.slug)}>
                 📋 Copy Short Link
               </button>
@@ -335,7 +381,7 @@ const AffiliatePage = () => {
                 <input className="form-input" type="url" placeholder="https://amazon.in/product/..." value={form.originalUrl} onChange={e => setForm({ ...form, originalUrl: e.target.value })} />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="affiliate-modal-grid">
                 <div className="form-group">
                   <label className="form-label">Platform</label>
                   <select className="form-select" value={form.platform} onChange={e => setForm({ ...form, platform: e.target.value })}>
@@ -352,7 +398,7 @@ const AffiliatePage = () => {
                 <summary style={{ cursor: 'pointer', fontSize: 13, color: 'var(--purple)', fontWeight: 600 }}>
                   + UTM Parameters (Advanced)
                 </summary>
-                <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                <div className="utm-grid" style={{ marginTop: 12 }}>
                   <div>
                     <label className="form-label" style={{ fontSize: 11 }}>utm_source</label>
                     <input className="form-input" style={{ padding: '6px 10px', fontSize: 12 }} placeholder="instagram" value={form.utmSource} onChange={e => setForm({ ...form, utmSource: e.target.value })} />
@@ -367,6 +413,40 @@ const AffiliatePage = () => {
                   </div>
                 </div>
               </details>
+
+              {/* Open in App Toggle */}
+              <div style={{
+                background: form.openInApp ? '#ECFDF5' : '#F9FAFB',
+                border: `1.5px solid ${form.openInApp ? '#A7F3D0' : '#E5E7EB'}`,
+                borderRadius: 10, padding: '14px 16px', marginBottom: 16,
+                display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+                cursor: 'pointer', transition: 'all 0.15s'
+              }} onClick={() => setForm({ ...form, openInApp: !form.openInApp })}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 2 }}>
+                    📱 Open in App
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                    Auto-detect YouTube, Instagram, Spotify etc. and open in native app instead of Instagram browser
+                  </div>
+                  {form.openInApp && (
+                    <div style={{ marginTop: 8, fontSize: 11, color: '#059669', fontWeight: 500 }}>
+                      ✓ Will auto-detect platform and attempt native app redirect
+                    </div>
+                  )}
+                </div>
+                <div style={{
+                  width: 42, height: 24, borderRadius: 12, flexShrink: 0, marginLeft: 12,
+                  background: form.openInApp ? '#059669' : '#D1D5DB',
+                  position: 'relative', transition: 'background 0.2s'
+                }}>
+                  <div style={{
+                    position: 'absolute', top: 3, left: form.openInApp ? 21 : 3,
+                    width: 18, height: 18, borderRadius: '50%', background: 'white',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.2)', transition: 'left 0.2s'
+                  }} />
+                </div>
+              </div>
 
               {form.slug && (
                 <div style={{ background: '#F0F4FF', border: '1px solid #C7D2FE', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 12, color: '#4C1D95' }}>

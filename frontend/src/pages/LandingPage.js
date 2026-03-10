@@ -44,41 +44,40 @@ const LandingPage = () => {
       <nav style={{
         position: 'sticky', top: 0, zIndex: 100,
         background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid #E5E7EB',
-        padding: '0 40px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        height: 64
+        borderBottom: '1px solid #E5E7EB'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 36, height: 36, background: 'linear-gradient(135deg, #6C63FF, #4ECDC4)',
-            borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 18
-          }}>⚡</div>
-          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#1A1A2E' }}>CreatorHub</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button
-            onClick={() => navigate('/login')}
-            style={{
-              padding: '8px 20px', background: 'transparent', border: '1.5px solid #E5E7EB',
-              borderRadius: 8, cursor: 'pointer', fontSize: 14, fontWeight: 600, color: '#1A1A2E',
-              fontFamily: 'inherit'
-            }}
-          >Sign In</button>
-          <button
-            onClick={() => navigate('/register')}
-            style={{
-              padding: '8px 20px', background: '#6C63FF', border: 'none',
-              borderRadius: 8, cursor: 'pointer', fontSize: 14, fontWeight: 600, color: 'white',
-              fontFamily: 'inherit'
-            }}
-          >Get Started Free</button>
+        <div className="landing-nav">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 36, height: 36, background: 'linear-gradient(135deg, #6C63FF, #4ECDC4)',
+              borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 18
+            }}>⚡</div>
+            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#1A1A2E' }}>CreatorStudio</span>
+          </div>
+          <div className="landing-nav-actions">
+            <button
+              onClick={() => navigate('/login')}
+              style={{
+                padding: '8px 20px', background: 'transparent', border: '1.5px solid #E5E7EB',
+                borderRadius: 8, cursor: 'pointer', fontSize: 14, fontWeight: 600, color: '#1A1A2E',
+                fontFamily: 'inherit'
+              }}
+            >Sign In</button>
+            <button
+              onClick={() => navigate('/register')}
+              style={{
+                padding: '8px 20px', background: '#6C63FF', border: 'none',
+                borderRadius: 8, cursor: 'pointer', fontSize: 14, fontWeight: 600, color: 'white',
+                fontFamily: 'inherit'
+              }}
+            >Get Started Free</button>
+          </div>
         </div>
       </nav>
 
       {/* Hero */}
-      <section style={{ padding: '80px 40px 60px', maxWidth: 1100, margin: '0 auto', textAlign: 'center' }}>
+      <section className="landing-hero">
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
           background: '#EEF0FF', color: '#6C63FF', padding: '6px 16px',
@@ -124,21 +123,20 @@ const LandingPage = () => {
         </div>
 
         {/* Stats strip */}
-        <div style={{
-          display: 'flex', justifyContent: 'center', gap: 40, marginTop: 60,
-          flexWrap: 'wrap', borderTop: '1px solid #E5E7EB', paddingTop: 40
-        }}>
-          {stats.map(s => (
-            <div key={s.value} style={{ textAlign: 'center' }}>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#6C63FF' }}>{s.value}</div>
-              <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 500, marginTop: 4 }}>{s.label}</div>
-            </div>
-          ))}
+        <div style={{ marginTop: 60, borderTop: '1px solid #E5E7EB', paddingTop: 40 }}>
+          <div className="landing-stats">
+            {stats.map(s => (
+              <div key={s.value} style={{ textAlign: 'center' }}>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#6C63FF' }}>{s.value}</div>
+                <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 500, marginTop: 4 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Features */}
-      <section style={{ padding: '60px 40px', background: '#FAFAFA' }}>
+      <section className="landing-features" style={{ background: '#FAFAFA' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 700, textAlign: 'center', marginBottom: 8, color: '#1A1A2E' }}>
             Everything you need to go pro
@@ -147,7 +145,7 @@ const LandingPage = () => {
             Three powerful tools. One platform. Zero complexity.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
+          <div className="landing-features-grid">
             {features.map(f => (
               <div key={f.title} style={{
                 background: 'white', borderRadius: 16, padding: 28,
@@ -155,8 +153,8 @@ const LandingPage = () => {
                 boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
                 transition: 'transform 0.2s ease, box-shadow 0.2s ease'
               }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.1)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)'; }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.1)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)'; }}
               >
                 <div style={{
                   width: 52, height: 52, background: f.color, borderRadius: 14,
@@ -174,11 +172,11 @@ const LandingPage = () => {
       </section>
 
       {/* How it works */}
-      <section style={{ padding: '60px 40px', maxWidth: 1100, margin: '0 auto' }}>
+      <section style={{ maxWidth: 1100, margin: '0 auto' }} className="landing-features">
         <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 700, textAlign: 'center', marginBottom: 48, color: '#1A1A2E' }}>
           Built for the Indian creator economy
         </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 24 }}>
+        <div className="landing-steps-grid">
           {[
             { step: '01', title: 'Share your collab link', desc: 'Add your /collab/username link to Instagram bio' },
             { step: '02', title: 'Brands fill the form', desc: 'Professional intake form captures all deal details' },
@@ -198,16 +196,14 @@ const LandingPage = () => {
       </section>
 
       {/* CTA */}
-      <section style={{
-        margin: '0 40px 60px', padding: '48px', textAlign: 'center',
-        background: 'linear-gradient(135deg, #6C63FF 0%, #4ECDC4 100%)',
-        borderRadius: 20, maxWidth: 1020, marginLeft: 'auto', marginRight: 'auto'
+      <section className="landing-cta" style={{
+        background: 'linear-gradient(135deg, #6C63FF 0%, #4ECDC4 100%)'
       }}>
         <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: 'white', marginBottom: 12 }}>
           Ready to get professional?
         </h2>
         <p style={{ color: 'rgba(255,255,255,0.85)', marginBottom: 28, fontSize: 15 }}>
-          Join 500+ Indian creators who use CreatorHub to manage their brand deals
+          Join 500+ Indian creators who use CreatorStudio to manage their brand deals
         </p>
         <button
           onClick={() => navigate('/register')}
@@ -220,8 +216,8 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer style={{ textAlign: 'center', padding: '24px', borderTop: '1px solid #E5E7EB', color: '#9CA3AF', fontSize: 13 }}>
-        © 2024 CreatorHub • Built for Indian Creators ⚡
+      <footer style={{ textAlign: 'center', padding: '24px 16px', borderTop: '1px solid #E5E7EB', color: '#9CA3AF', fontSize: 13 }}>
+        © 2024 CreatorStudio • Built for Indian Creators ⚡
       </footer>
     </div>
   );

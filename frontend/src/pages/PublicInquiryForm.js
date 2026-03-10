@@ -79,9 +79,9 @@ const PublicInquiryForm = () => {
   );
 
   if (submitted) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#F9FAFB', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#F9FAFB', fontFamily: "'DM Sans', sans-serif", padding: 16 }}>
       <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-      <div style={{ textAlign: 'center', padding: 48, background: 'white', borderRadius: 20, boxShadow: '0 8px 40px rgba(0,0,0,0.1)', maxWidth: 440 }}>
+      <div style={{ textAlign: 'center', padding: 48, background: 'white', borderRadius: 20, boxShadow: '0 8px 40px rgba(0,0,0,0.1)', maxWidth: 440, width: '100%' }}>
         <div style={{ width: 72, height: 72, background: 'linear-gradient(135deg, #6C63FF, #4ECDC4)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 20px' }}>✓</div>
         <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, marginBottom: 12 }}>Inquiry Sent!</h2>
         <p style={{ color: '#6B7280', lineHeight: 1.7, marginBottom: 24 }}>
@@ -94,7 +94,7 @@ const PublicInquiryForm = () => {
             ⏳ Response in 48–72 hours
           </div>
         </div>
-        <p style={{ fontSize: 12, color: '#9CA3AF' }}>Powered by <strong>CreatorHub</strong></p>
+        <p style={{ fontSize: 12, color: '#9CA3AF' }}>Powered by <strong>CreatorStudio</strong></p>
       </div>
     </div>
   );
@@ -129,7 +129,7 @@ const PublicInquiryForm = () => {
         }}>
           {creator?.name?.charAt(0).toUpperCase()}
         </div>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, color: 'white', marginBottom: 4, position: 'relative' }}>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(20px, 5vw, 26px)', color: 'white', marginBottom: 4, position: 'relative' }}>
           Work with {creator?.name}
         </h1>
         <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 14, position: 'relative' }}>
@@ -143,8 +143,8 @@ const PublicInquiryForm = () => {
       </div>
 
       {/* Form */}
-      <div style={{ maxWidth: 600, margin: '0 auto', padding: '32px 20px' }}>
-        <div style={{ background: 'white', borderRadius: 16, boxShadow: '0 4px 24px rgba(0,0,0,0.08)', padding: 32 }}>
+      <div style={{ maxWidth: 600, margin: '0 auto', padding: '32px 16px' }}>
+        <div style={{ background: 'white', borderRadius: 16, boxShadow: '0 4px 24px rgba(0,0,0,0.08)', padding: 'clamp(20px, 4vw, 32px)' }}>
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, marginBottom: 4 }}>Brand Collaboration Inquiry</h2>
           <p style={{ color: '#6B7280', fontSize: 14, marginBottom: 28 }}>Fill in your details to start a conversation about collaborating.</p>
 
@@ -152,7 +152,7 @@ const PublicInquiryForm = () => {
             {/* Brand info */}
             <div style={{ marginBottom: 24 }}>
               <h4 style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#9CA3AF', fontWeight: 600, marginBottom: 14 }}>Brand Information</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="inquiry-form-grid">
                 <div style={{ marginBottom: 0 }}>
                   <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 5 }}>Brand Name *</label>
                   <input className="form-input" placeholder="Your Brand Name" value={form.brandName} onChange={e => setForm({ ...form, brandName: e.target.value })} required />
@@ -191,7 +191,7 @@ const PublicInquiryForm = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="inquiry-form-grid">
                 <div>
                   <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 5 }}>Budget Range *</label>
                   <select className="form-select" value={form.budgetRange} onChange={e => setForm({ ...form, budgetRange: e.target.value })} required>
@@ -252,7 +252,7 @@ const PublicInquiryForm = () => {
         </div>
 
         <div style={{ textAlign: 'center', padding: 24, fontSize: 12, color: '#9CA3AF' }}>
-          Powered by <strong style={{ color: '#6C63FF' }}>CreatorHub</strong> — Professional Creator Toolkit
+          Powered by <strong style={{ color: '#6C63FF' }}>CreatorStudio</strong> — Professional Creator Toolkit
         </div>
       </div>
     </div>

@@ -15,11 +15,20 @@ const InquiriesPage = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
   const [selected, setSelected] = useState(null);
+  const [openRows, setOpenRows] = useState(new Set());
   const [editModal, setEditModal] = useState(false);
   const [editData, setEditData] = useState({});
   const [total, setTotal] = useState(0);
   const [stats, setStats] = useState([]);
 
+  const toggleRow = (id) => {
+    setOpenRows(prev => {
+      const copy = new Set(prev);
+      if (copy.has(id)) copy.delete(id);
+      else copy.add(id);
+      return copy;
+    });
+  }
   const fetchInquiries = async (status = '') => {
     setLoading(true);
     try {
@@ -68,7 +77,7 @@ const InquiriesPage = () => {
     <div className="dashboard-layout">
       <Sidebar />
       <main className="main-content">
-        <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div className="page-header page-header-flex">
           <div>
             <h1>Brand Inquiries</h1>
             <p>Manage all your brand collaboration requests</p>
@@ -79,12 +88,12 @@ const InquiriesPage = () => {
         </div>
 
         {/* Mini stats */}
-        <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 20 }}>
+        <div className="stats-grid inquiries-stats-grid" style={{ marginBottom: 20 }}>
           {[
             { label: 'Total', value: total, icon: '📬', color: '#EEF0FF' },
             { label: 'New', value: newCount, icon: '🆕', color: '#EEF0FF' },
             { label: 'Accepted', value: acceptedCount, icon: '✅', color: '#ECFDF5' },
-            { label: 'Revenue', value: `₹${(totalRevenue/1000).toFixed(1)}K`, icon: '💰', color: '#FFF8E6' },
+            { label: 'Revenue', value: `₹${(totalRevenue / 1000).toFixed(1)}K`, icon: '💰', color: '#FFF8E6' },
           ].map(s => (
             <div key={s.label} className="stat-card" style={{ padding: 16 }}>
               <div className="stat-icon" style={{ background: s.color, width: 32, height: 32, fontSize: 16 }}>{s.icon}</div>
@@ -95,7 +104,7 @@ const InquiriesPage = () => {
         </div>
 
         {/* Filter tabs */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+        <div className="inquiries-filter-tabs">
           {['', ...STATUS_OPTIONS].map(s => (
             <button
               key={s || 'all'}
@@ -114,7 +123,7 @@ const InquiriesPage = () => {
           ))}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 380px' : '1fr', gap: 20 }}>
+        <div className={`dashboard-grid ${selected ? 'dashboard-grid-with-panel' : ''}`}>
           {/* Table */}
           <div className="card" style={{ padding: 0 }}>
             {loading ? (
@@ -129,17 +138,17 @@ const InquiriesPage = () => {
                 <p>Brand inquiries will appear here when brands submit your form.</p>
               </div>
             ) : (
-              <div className="table-wrapper">
-                <table>
+              <div className="inquiries-table-wrapper">
+                <table className="inquiries-table">
                   <thead>
                     <tr>
                       <th>Brand</th>
-                      <th>Contact</th>
-                      <th>Budget</th>
-                      <th>Campaign</th>
+                      <th className="hide-mobile">Contact</th>
+                      <th className="hide-mobile">Budget</th>
+                      <th className="hide-mobile">Campaign</th>
                       <th>Status</th>
-                      <th>Deal Value</th>
-                      <th>Date</th>
+                      <th className="hide-mobile">Deal Value</th>
+                      <th className="hide-mobile">Date</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -147,23 +156,24 @@ const InquiriesPage = () => {
                     {inquiries.map(inq => (
                       <tr
                         key={inq._id}
+                        className={openRows.has(inq._id) ? 'expanded' : ''}
                         style={{ cursor: 'pointer', background: selected?._id === inq._id ? '#F8F9FF' : 'white' }}
-                        onClick={() => setSelected(inq)}
+                        onClick={() => { toggleRow(inq._id); setSelected(inq); }}
                       >
-                        <td>
+                        <td className="brand-cell">
                           <strong style={{ fontSize: 14 }}>{inq.brandName}</strong>
                           {inq.category && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{inq.category}</div>}
                         </td>
-                        <td>
+                        <td className="contact-cell hide-mobile">
                           <div style={{ fontSize: 13 }}>{inq.contactPerson}</div>
                           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{inq.email}</div>
                         </td>
-                        <td><span style={{ color: 'var(--purple)', fontWeight: 600, fontSize: 12 }}>{inq.budgetRange}</span></td>
-                        <td>{inq.campaignType.map(t => <span key={t} className="tag">{t}</span>)}</td>
+                        <td className="hide-mobile"><span style={{ color: 'var(--purple)', fontWeight: 600, fontSize: 12 }}>{inq.budgetRange}</span></td>
+                        <td className="campaign-cell hide-mobile">{inq.campaignType.map(t => <span key={t} className="tag">{t}</span>)}</td>
                         <td><span className={getStatusClass(inq.status)}>{inq.status}</span></td>
-                        <td>{inq.dealValue > 0 ? <span style={{ color: '#059669', fontWeight: 600 }}>₹{inq.dealValue.toLocaleString()}</span> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</td>
-                        <td style={{ color: 'var(--text-muted)', fontSize: 12, whiteSpace: 'nowrap' }}>{new Date(inq.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</td>
-                        <td onClick={e => e.stopPropagation()}>
+                        <td className="hide-mobile">{inq.dealValue > 0 ? <span style={{ color: '#059669', fontWeight: 600 }}>₹{inq.dealValue.toLocaleString()}</span> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</td>
+                        <td className="hide-mobile" style={{ color: 'var(--text-muted)', fontSize: 12, whiteSpace: 'nowrap' }}>{new Date(inq.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</td>
+                        <td className="actions-cell" onClick={e => e.stopPropagation()}>
                           <button
                             className="btn btn-sm btn-outline"
                             onClick={() => { setEditData({ ...inq }); setEditModal(true); }}
@@ -179,7 +189,7 @@ const InquiriesPage = () => {
 
           {/* Detail panel */}
           {selected && (
-            <div className="card" style={{ position: 'sticky', top: 20, height: 'fit-content', maxHeight: '80vh', overflowY: 'auto' }}>
+            <div className="card inquiries-detail-panel" style={{ position: 'sticky', top: 20, height: 'fit-content', maxHeight: '80vh', overflowY: 'auto' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18 }}>{selected.brandName}</h3>
                 <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--text-muted)' }}>×</button>

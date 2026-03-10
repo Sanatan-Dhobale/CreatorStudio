@@ -4,16 +4,28 @@ const UAParser = require('ua-parser-js');
 const { v4: uuidv4 } = require('uuid');
 const { AffiliateLink, ClickAnalytics } = require('../models/Affiliate');
 const { protect } = require('../middleware/auth');
+const { generateDeepLink } = require('../utils/deepLink');
 
 // POST /api/affiliate/links — Create new link
 router.post('/links', protect, async (req, res) => {
   try {
-    const { title, originalUrl, slug, platform, category, utmSource, utmMedium, utmCampaign } = req.body;
+    const { title, originalUrl, slug, platform, category, utmSource, utmMedium, utmCampaign, openInApp } = req.body;
 
     const finalSlug = slug || `${req.creator.username}-${uuidv4().substring(0, 8)}`;
 
     const existingSlug = await AffiliateLink.findOne({ slug: finalSlug });
     if (existingSlug) return res.status(400).json({ success: false, error: 'Slug already taken. Please choose another.' });
+
+    // Pre-resolve deep link info so redirect is fast (no re-parsing every click)
+    let deepLinkPlatform = '', deepLinkIos = '', deepLinkAndroid = '';
+    if (openInApp && originalUrl) {
+      const dl = generateDeepLink(originalUrl);
+      if (dl) {
+        deepLinkPlatform = dl.platform;
+        deepLinkIos      = dl.ios;
+        deepLinkAndroid  = dl.android;
+      }
+    }
 
     const link = await AffiliateLink.create({
       creatorId: req.creator._id,
@@ -22,7 +34,11 @@ router.post('/links', protect, async (req, res) => {
       slug: finalSlug,
       platform: platform || 'Other',
       category: category || 'General',
-      utmSource, utmMedium, utmCampaign
+      utmSource, utmMedium, utmCampaign,
+      openInApp:        !!openInApp,
+      deepLinkPlatform,
+      deepLinkIos,
+      deepLinkAndroid
     });
 
     res.status(201).json({ success: true, link });
